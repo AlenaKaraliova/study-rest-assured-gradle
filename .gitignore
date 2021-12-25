@@ -1,0 +1,21 @@
+# Ignore all gradle related files
+.gradle/
+
+# Ignore all eclipse related files
+.settings/
+.classpath
+.project
+
+# Ignore all IntelliJ related files
+*.iml
+*.ipr
+*.iws
+.idea*
+
+/bin/
+*/build/
+*/target/
+*/out/
+*/allure-results/
+
+*.tmp
