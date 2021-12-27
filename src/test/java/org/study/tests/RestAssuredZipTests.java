@@ -7,7 +7,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.equalTo;
 
-public class ZipTests {
+public class RestAssuredZipTests {
 
     private static final String URL = "https://api.zippopotam.us/us/{zip}";
 

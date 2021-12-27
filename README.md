@@ -172,11 +172,11 @@ Let's create an automation framework for Restful API testing. Tools:
 [REST-assured Documentation](https://rest-assured.io/)
 [REST-assured User Guide](https://github.com/rest-assured/rest-assured/wiki/Usage)
 
-14. Add RestAssured library: 
+21. Add RestAssured library: 
     1. in `build.gradle` file, `dependencies` section, add `testImplementation 'io.rest-assured:rest-assured:4.4.0'`,
     2. rebuild the project **Gradle** - **Reload All Gradle Projects**,
     3. ensure that the library has appeared in **External Libraries**.
-15. Add Java class `ZipTests` in `tests` package:
+22. Add Java class `RestAssuredZipTests` in `tests` package:
     ```java
     package org.study.tests;
     
@@ -187,7 +187,7 @@ Let's create an automation framework for Restful API testing. Tools:
     import static org.hamcrest.Matchers.aMapWithSize;
     import static org.hamcrest.Matchers.equalTo;
     
-    public class ZipTests {
+    public class RestAssuredZipTests {
     
         private static final String URL = "https://api.zippopotam.us/us/{zip}";
     
@@ -207,17 +207,18 @@ Let's create an automation framework for Restful API testing. Tools:
     
     }
     ```
-16. Run the test, it should pass.
-17. Let's create a test that deserializes response json into a POJO:
+23. Run the test, it should pass.
+24. Let's create a test that deserializes response json into a POJO:
     1. create `org.study.model` package,
     2. create class `ZipResponse`:
        ```java
 ...lombok...
        ```
-    3. create one more test in `ZipTests`:
+    3. create one more test in `RestAssuredZipTests`:
        ```java
 
        ```
-18. 
-    `
+25. Task #1
+26. Task #2
+27. Suite by *RestAssured
  
