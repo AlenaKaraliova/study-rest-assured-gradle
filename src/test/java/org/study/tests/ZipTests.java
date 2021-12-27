@@ -26,3 +26,12 @@ public class ZipTests {
     }
 
 }
+// POST in other class
+
+// https://api.zippopotam.us/us/ 404 --> task
+
+// http://api.zippopotam.us/us/ma/belmont --> task
+// {"country abbreviation": "US", "places":
+// [{"place name": "Belmont", "longitude": "-71.4594", "post code": "02178", "latitude": "42.4464"},
+// {"place name": "Belmont", "longitude": "-71.2044", "post code": "02478", "latitude": "42.4128"}],
+// "country": "United States", "place name": "Belmont", "state": "Massachusetts", "state abbreviation": "MA"}
