@@ -12,16 +12,22 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ZipResponse {
+public class ZipByCityResponse {
 
-    @JsonProperty("post code")
-    private String postCode;
+    @JsonProperty("place name")
+    private String placeName;
 
     @JsonProperty("country")
     private String country;
 
     @JsonProperty("country abbreviation")
     private String countryAbbreviation;
+
+    @JsonProperty("state")
+    private String state;
+
+    @JsonProperty("state abbreviation")
+    private String stateAbbreviation;
 
     @JsonProperty("places")
     private List<Places> places;
@@ -47,6 +53,10 @@ public class ZipResponse {
         @JsonProperty("state abbreviation")
         private String stateAbbreviation;
 
+        @JsonProperty("post code")
+        private String postCode;
+
     }
 
 }
+
