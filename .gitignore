@@ -12,10 +12,8 @@
 *.iws
 .idea*
 
-/bin/
-*/build/
-*/target/
-*/out/
-*/allure-results/
+build
+target
+out
 
 *.tmp

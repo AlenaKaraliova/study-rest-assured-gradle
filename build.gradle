@@ -1,6 +1,17 @@
 plugins {
     id 'java'
     id 'io.freefair.lombok' version '6.3.0'
+    id 'io.qameta.allure' version '2.9.6'
+}
+
+allure {
+    adapter.autoconfigure = true
+    adapter.aspectjWeaver = true
+    version = "$allure_version"
+
+    useJUnit5 {
+        version = "$allure_version"
+    }
 }
 
 group 'org.study'
@@ -20,6 +31,10 @@ dependencies {
     testImplementation "com.fasterxml.jackson.core:jackson-core:$jackson_version"
     testImplementation "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+
+    testImplementation "io.qameta.allure:allure-rest-assured:$allure_version"
+
+    testImplementation "ch.qos.logback:logback-classic:$logback_version"
 }
 
 test {

@@ -1,10 +1,11 @@
 # Description
+
 Let's create an automation framework for Restful API testing. Tools:
 - Java `11`,
 - Lombok `6.3.0`,
 - REST-assured `4.4.0`,
 - JUnit5 `5.8.2`,
-- Allure,
+- Allure `2.9.6`,
 - Gradle `7.3.3`.
 
 # Instructions
@@ -58,11 +59,9 @@ Let's create an automation framework for Restful API testing. Tools:
     *.iws
     .idea*
    
-    /bin/
-    */build/
-    */target/
-    */out/
-    */allure-results/
+    build
+    target
+    out
     
     *.tmp
     ```
@@ -412,8 +411,8 @@ Let's create an automation framework for Restful API testing. Tools:
 
         }
         ```
-5. Task #1: create a test for HTTP status code 404 using `https://api.zippopotam.us/us/` URL.
-6. Task #2: create tests for another model - zip by city using `http://api.zippopotam.us/us/ma/belmont`.
+5. Task: create a test for HTTP status code 404 using `https://api.zippopotam.us/us/` URL.
+6. Task: create tests for another model - zip by city using `http://api.zippopotam.us/us/ma/belmont`.
 7. Create a suite for REST-assured tests:
     ```java
     package org.study.tests;
@@ -433,7 +432,137 @@ Let's create an automation framework for Restful API testing. Tools:
 
 ## Allure
 
-TODO
+1. Install Allure Command Line using [instructions](https://docs.qameta.io/allure/#_installing_a_commandline).
+2. Check Allure version: `allure --version`.
+3. Add and configure Gradle plugin in `build.gradle`:
+    ```groovy
+    plugins {
+        // ...
+        id 'io.qameta.allure' version '2.9.6'
+    }
+   
+    allure {
+        adapter.autoconfigure = true
+        adapter.aspectjWeaver = true
+        version = '2.17.1'
+
+        useJUnit5 {
+            version = '2.17.1'
+        }
+    }
+    ``` 
+4. Rebuild the project and run some tests, for example `RestAssuredSuite`.
+5. In Terminal execute `allure serve $projectRoot/study-rest-assured-gradle\build\allure-results`.
+6. As a result, a new browser window will be opened with a test execution report. It will contain tests and no step details.
+7. To create more informative report, do the following:
+    1. create a separate package `allure` in `tests` and copy REST-assured tests there,
+    2. rename the tests to comply with `RestAssuredWithAllure*Tests` pattern,
+    3. create a test suite `RestAssuredWithAllureSuite` and change package pattern `@SelectPackages("org.study.tests.allure")`,
+    4. add a filter for REST-assured HTTP client that generates attachments for Allure:
+        * add a dependency `testImplementation 'io.qameta.allure:allure-rest-assured:2.17.1'`,
+        * create `RestAssuredWithAllureTestsBase` class with filters configuration:
+        ```java
+        package org.study.tests.allure;
+
+        import io.qameta.allure.restassured.AllureRestAssured;
+        import io.restassured.RestAssured;
+        import org.junit.jupiter.api.BeforeAll;
+
+        public class RestAssuredWithAllureTestsBase {
+
+            @BeforeAll
+            protected static void configure() {
+                RestAssured.filters(new AllureRestAssured());
+            }
+
+        }
+        ```
+        * extend `RestAssuredWithAllure*` tests from this base class,
+        * execute `RestAssuredWithAllureSuite` and observe Allure report - now it contains request and response details,
+        * more information can be found [here](https://github.com/allure-framework/allure-java).
+    5. Task: add Epic, Feature, Story, and Description to the tests, for example:
+        ```java
+        @Epic("REST-assured")
+        @Feature("TODO Application")
+        public class RestAssuredWithAllureTodosTests extends RestAssuredWithAllureTestsBase {
+    
+            @Story("Positive Tests")
+            @Description("Add a TODO for a User with JUnit5 Validations")
+            @Test
+            void validZipPojoTest() {
+                // 
+            }
+        }
+        ```  
+       Discover the information on **Behaviors** section of Allure report.
+    6. Task: add Steps in all tests, for example:
+        ```java
+        package org.study.tests.allure;
+    
+        import io.qameta.allure.Description;
+        import io.qameta.allure.Epic;
+        import io.qameta.allure.Feature;
+        import io.qameta.allure.Step;
+        import io.qameta.allure.Story;
+        import io.restassured.http.ContentType;
+        import io.restassured.response.ValidatableResponse;
+        import org.junit.jupiter.api.Assertions;
+        import org.junit.jupiter.api.Test;
+        import org.study.model.TodoRequest;
+        import org.study.model.TodoResponse;
+    
+        import static io.restassured.RestAssured.given;
+    
+        @Epic("REST-assured")
+        @Feature("TODO Application")
+        public class RestAssuredWithAllureTodosTests extends RestAssuredWithAllureTestsBase {
+    
+            private static final String TODO_URL = "https://jsonplaceholder.typicode.com/users/{userId}/todos";
+    
+            @Story("Positive Tests")
+            @Description("Add a TODO for a User with JUnit5 Validations")
+            @Test
+            void validZipPojoTest() {
+                Integer userId = 1;
+                String title = "todo #1";
+                boolean completed = false;
+                TodoRequest todoRequest = new TodoRequest().userId(userId).title(title).completed(completed);
+                TodoResponse todoResponse = executePostRequest(TODO_URL, userId, todoRequest)
+                    .statusCode(201)
+                    .contentType(ContentType.JSON)
+                    .extract().as(TodoResponse.class);
+    
+                Assertions.assertAll(
+                    () -> Assertions.assertEquals(201, todoResponse.id(), "id"),
+                    () -> Assertions.assertEquals(1, todoResponse.userId(), "userId"),
+                    () -> Assertions.assertEquals("todo #1", todoResponse.title(), "title"),
+                    () -> Assertions.assertEquals(completed, todoResponse.completed(), "completed")
+                );
+            }
+    
+            @Step("Execute POST to {url} for user {userId} with TODO title {todoRequest.title} and status {todoRequest.completed}")
+            private ValidatableResponse executePostRequest(String url, Integer userId, TodoRequest todoRequest) {
+                return given().log().all()
+                    .when().body(todoRequest).header("Content-Type", ContentType.JSON).post(url, userId)
+                    .then().log().all();
+            }
+    
+        }
+        ```
+       Generate a new Allure report and find these steps in tests.
+8. Task: specify custom templates, which should be placed in `src/main/resources/tpl` folder:
+    ```java
+    public class RestAssuredWithAllureTestsBase {
+   
+        @BeforeAll
+        protected static void configure() {
+        RestAssured.filters(new AllureRestAssured()
+            .setRequestTemplate("rest-assured-allure-http-request.ftl")
+            .setResponseTemplate("rest-assured-allure-http-response.ftl"));
+        }
+   
+    }
+    ```
 
 ## Enhancements
 
@@ -447,9 +576,21 @@ To better control dependencies versions used in the project, extract them into a
     junit_platform_version = 1.8.2
     rest_assured_version = 4.4.0
     jackson_version = 2.13.1
+    jaxb_api_version = 2.3.1
+    allure_version = 2.17.1
     ```
 2. `study-rest-assured-gradle/build.gradle`:
     ```groovy
+    allure {
+        adapter.autoconfigure = true
+        adapter.aspectjWeaver = true
+        version = "$allure_version"
+
+        useJUnit5 {
+            version = "$allure_version"
+        }
+    }
+
     dependencies {
         testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
@@ -460,7 +601,173 @@ To better control dependencies versions used in the project, extract them into a
         testImplementation "com.fasterxml.jackson.core:jackson-core:$jackson_version"
         testImplementation "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
         testImplementation "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+   
+        testImplementation "io.qameta.allure:allure-rest-assured:$allure_version"
     }
     ```
    
-### TODO
+### Logging
+
+We will use Lobmok support for logging and create a custom logging template for REST-assured steps.
+
+1. Notice that currently logs in test execution console look like for this request:
+    ```text
+    Request method:	POST
+    Request URI:	https://jsonplaceholder.typicode.com/users/1/todos
+    Proxy:			<none>
+    Request params:	<none>
+    Query params:	<none>
+    Form params:	<none>
+    Path params:	<none>
+    Headers:		Accept=*/*
+    Content-Type=application/json
+    Cookies:		<none>
+    Multiparts:		<none>
+    Body:
+    {
+    "userId": 1,
+    "id": null,
+    "title": "todo #1",
+    "completed": false
+    }
+    ```
+   No timestamp, no pattern, with some information that we might not need.
+2. Add this [logback](https://logback.qos.ch/documentation.html) dependency: `implementation "ch.qos.logback:logback-classic:$logback_version"` where `logback_version = 1.2.9`.
+3. Add a config file `logback-test.xml` to `resources`:
+    ```xml
+    <configuration>
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>
+                    %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+                </pattern>
+            </encoder>
+        </appender>
+
+        <logger name="root" level="ERROR"/>
+        <logger name="org.study" level="INFO"/>
+
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+
+    </configuration>
+    ```
+4. Create `utils` package in `tests`.
+5. Create class `RestAssuredRequestFilter`:
+    ```java
+    package org.study.utils;
+
+    import io.restassured.filter.Filter;
+    import io.restassured.filter.FilterContext;
+    import io.restassured.response.Response;
+    import io.restassured.specification.FilterableRequestSpecification;
+    import io.restassured.specification.FilterableResponseSpecification;
+    import lombok.extern.slf4j.Slf4j;
+
+    @Slf4j
+    public class RestAssuredRequestFilter implements Filter {
+
+        @Override
+        public Response filter(
+            FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec, FilterContext ctx) {
+            log.info("Executing {} to URL: {}", requestSpec.getMethod(), requestSpec.getURI());
+            if (requestSpec.getHeaders() != null) {
+                log.info("Request Headers:\n{}", requestSpec.getHeaders().toString());
+            }
+            if (requestSpec.getBody() != null) {
+                log.info("Request Body:\n{}", requestSpec.getBody().toString());
+            }
+
+            return ctx.next(requestSpec, responseSpec);
+        }
+
+    }
+    ```
+   Here, `@Slf4j` Lombok annotation provides `log` object into this class.
+6. Create class `RestAssuredResponseFilter`:
+    ```java
+    package org.study.utils;
+
+    import io.restassured.filter.Filter;
+    import io.restassured.filter.FilterContext;
+    import io.restassured.response.Response;
+    import io.restassured.specification.FilterableRequestSpecification;
+    import io.restassured.specification.FilterableResponseSpecification;
+    import lombok.extern.slf4j.Slf4j;
+    
+    @Slf4j
+    public class RestAssuredResponseFilter implements Filter {
+    
+        @Override
+        public Response filter(
+            FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec, FilterContext ctx) {
+            Response response = ctx.next(requestSpec, responseSpec);
+    
+            log.info("Response Status: {} {}", response.getStatusCode(), response.getStatusLine());
+
+            if (response.getBody() != null) {
+                log.info("Response Body:\n{}", response.getBody().asPrettyString());
+            }
+    
+            return response;
+        }
+    
+    }
+   ```
+7. Update `RestAssuredWithAllureTestsBase` to add all necessary filters:
+    ```java
+    package org.study.tests.allure;
+
+    import io.qameta.allure.restassured.AllureRestAssured;
+    import io.restassured.RestAssured;
+    import io.restassured.filter.Filter;
+    import org.junit.jupiter.api.BeforeAll;
+    import org.study.utils.RestAssuredRequestFilter;
+    import org.study.utils.RestAssuredResponseFilter;
+    
+    import java.util.ArrayList;
+    import java.util.List;
+    public class RestAssuredWithAllureTestsBase {
+    
+        @BeforeAll
+        protected static void configure() {
+            List<Filter> filters = new ArrayList<>();
+    
+            filters.add(new AllureRestAssured()
+                .setRequestTemplate("rest-assured-allure-http-request.ftl")
+                .setResponseTemplate("rest-assured-allure-http-response.ftl"));
+    
+            filters.add(new RestAssuredRequestFilter());
+            filters.add(new RestAssuredResponseFilter());
+    
+            RestAssured.filters(filters);
+        }
+    
+    }
+    ```
+8. Run a test and compare logs format, now they comply with the configured pattern: `%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n`.
+    ```text
+    12:12:12.000 [Test worker] INFO  o.s.utils.RestAssuredRequestFilter - Executing POST to URL: https://jsonplaceholder.typicode.com/users/1/todos
+    12:12:12.000 [Test worker] INFO  o.s.utils.RestAssuredRequestFilter - Request Headers:
+    Accept=*/*
+    Content-Type=application/json
+    12:12:12.000 [Test worker] INFO  o.s.utils.RestAssuredRequestFilter - Request Body:
+    {"userId":1,"id":null,"title":"todo #1","completed":false}
+    ```
+9. But now we have duplicate logging. To remove it - delete `log().all()` from all REST-assured specifications in tests, for example:
+    ```java
+    public class RestAssuredWithAllureZipTests extends RestAssuredWithAllureTestsBase {
+   
+        @Step("Execute GET to {url} with parameters {parameters}")
+        private ValidatableResponse executeGetRequest(String url, Object... parameters) {
+            return given().when().get(url, parameters).then();
+        }
+    }
+    ```
+   This refactoring will be easy as we have already extracted these methods in separate steps.
+   
+### Configuration Properties
+
+TODO
+
