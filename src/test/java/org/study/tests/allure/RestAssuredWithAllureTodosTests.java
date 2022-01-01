@@ -9,6 +9,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.study.config.EnvConfigProvider;
 import org.study.model.TodoRequest;
 import org.study.model.TodoResponse;
 
@@ -18,8 +19,6 @@ import static io.restassured.RestAssured.given;
 @Feature("TODO Application")
 public class RestAssuredWithAllureTodosTests extends RestAssuredWithAllureTestsBase {
 
-    private static final String TODO_URL = "https://jsonplaceholder.typicode.com/users/{userId}/todos";
-
     @Story("Positive Tests")
     @Description("Add a TODO for a User with JUnit5 Validations")
     @Test
@@ -28,7 +27,7 @@ public class RestAssuredWithAllureTodosTests extends RestAssuredWithAllureTestsB
         String title = "todo #1";
         boolean completed = false;
         TodoRequest todoRequest = new TodoRequest().userId(userId).title(title).completed(completed);
-        TodoResponse todoResponse = executePostRequest(TODO_URL, userId, todoRequest)
+        TodoResponse todoResponse = executePostRequest(EnvConfigProvider.todoURL, userId, todoRequest)
             .statusCode(201)
             .contentType(ContentType.JSON)
             .extract().as(TodoResponse.class);

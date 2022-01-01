@@ -1,16 +1,17 @@
-package org.study.tests;
+package org.study.tests.restassured;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.study.config.EnvConfigProvider;
 import org.study.model.TodoRequest;
 import org.study.model.TodoResponse;
 
 import static io.restassured.RestAssured.given;
 
-public class RestAssuredTodosTests {
+public class RestAssuredTodosTests extends RestAssuredTestsBase {
 
-    private static final String TODO_URL = "https://jsonplaceholder.typicode.com/users/{userId}/todos";
+    private static final String TODO_URL = EnvConfigProvider.todoURL;
 
     @Test
     void validZipPojoTest() {

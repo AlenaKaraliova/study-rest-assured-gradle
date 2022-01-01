@@ -9,6 +9,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.study.config.EnvConfigProvider;
 import org.study.model.ZipByCityResponse;
 import org.study.model.ZipResponse;
 
@@ -20,8 +21,8 @@ import static org.hamcrest.Matchers.equalTo;
 @Feature("ZIP Code Application")
 public class RestAssuredWithAllureZipTests extends RestAssuredWithAllureTestsBase {
 
-    private static final String ZIP_URL = "https://api.zippopotam.us/us/{zip}";
-    private static final String ZIP_BY_CITY_URL = "https://api.zippopotam.us/us/{state}/{city}";
+    private static final String ZIP_URL = EnvConfigProvider.zipURL;
+    private static final String ZIP_BY_CITY_URL = EnvConfigProvider.zipByCityURL;
 
     @Story("Positive Tests")
     @Description("Places by ZIP Code with Json Path Validations")

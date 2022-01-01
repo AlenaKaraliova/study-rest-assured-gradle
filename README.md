@@ -135,13 +135,13 @@ Let's create an automation framework for Restful API testing. Tools:
     
         @Test
         void testPassing() {
-            Assertions.assertEquals(6, 2*3, "multiply operation");
+            Assertions.assertEquals(6, 2 * 3, "multiply operation");
         }
     
         @Test
         void testFailing() {
             Assertions.assertAll(
-                () -> Assertions.assertEquals(7, 2*3, "multiply operation"),
+                () -> Assertions.assertEquals(7, 2 * 3, "multiply operation"),
                 () -> Assertions.assertTrue(true, "true statement"),
                 () -> Assertions.fail("fail here")
             );
@@ -185,7 +185,10 @@ Let's create an automation framework for Restful API testing. Tools:
 * [REST-assured User Guide](https://github.com/rest-assured/rest-assured/wiki/Usage)
 
 1. Add Rest-assured library: 
-    1. in `build.gradle` file, `dependencies` section, add `testImplementation 'io.rest-assured:rest-assured:4.4.0'`,
+    1. in `build.gradle` file, `dependencies` section, add 
+    ```groovy
+    testImplementation 'io.rest-assured:rest-assured:4.4.0'
+    ```
     2. rebuild the project **Gradle** - **Reload All Gradle Projects**,
     3. ensure that the library has appeared in **External Libraries**.
 2. Add Java class `RestAssuredZipTests` in `tests` package:
@@ -220,169 +223,169 @@ Let's create an automation framework for Restful API testing. Tools:
     }
     ```
 3. Run the test, it should pass.
-    1. Let's create a test that deserializes response json into a POJO:
-        1. first, we need to implement response model, for that create `org.study.model` package,
-        2. create class `ZipResponse` with the necessary fields:
-            ```java
-            public class ZipResponse {
-                private String postCode;
-                private String country;
-                private String countryAbbreviation;
-                private List<Places> places;
-                public static class Places {
-                    private String placeName;
-                    private String longitude;
-                    private String latitude;
-                    private String state;
-                    private String stateAbbreviation;
-                }
+4. Let's create a test that deserializes response json into a POJO:
+    1. first, we need to implement response model, for that create `org.study.model` package,
+    2. create class `ZipResponse` with the necessary fields:
+        ```java
+        public class ZipResponse {
+            private String postCode;
+            private String country;
+            private String countryAbbreviation;
+            private List<Places> places;
+            public static class Places {
+                private String placeName;
+                private String longitude;
+                private String latitude;
+                private String state;
+                private String stateAbbreviation;
             }
-            ```
-        3. add lombok annotations to provide getters, setters, constructors,
-            ```java
-            package org.study.model; 
+        }
+        ```
+    3. add lombok annotations to provide getters, setters, constructors,
+        ```java
+        package org.study.model; 
 
-            import com.fasterxml.jackson.annotation.JsonProperty;
-            import lombok.AllArgsConstructor;
-            import lombok.Data;
-            import lombok.NoArgsConstructor;
-            import lombok.experimental.Accessors;
+        import com.fasterxml.jackson.annotation.JsonProperty;
+        import lombok.AllArgsConstructor;
+        import lombok.Data;
+        import lombok.NoArgsConstructor;
+        import lombok.experimental.Accessors;
 
-            import java.util.List;
+        import java.util.List;
 
+        @Data
+        @Accessors(fluent = true)
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public class ZipResponse {
+            //
+        }
+        ```
+    4. add annotations for proper json parsing:
+        ```java
+        package org.study.model;
+    
+        import com.fasterxml.jackson.annotation.JsonProperty;
+        import lombok.AllArgsConstructor;
+        import lombok.Data;
+        import lombok.NoArgsConstructor;
+        import lombok.experimental.Accessors;
+    
+        import java.util.List;
+    
+        @Data
+        @Accessors(fluent = true)
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public class ZipResponse {
+    
+            @JsonProperty("post code")
+            private String postCode;
+    
+            @JsonProperty("country")
+            private String country;
+    
+            @JsonProperty("country abbreviation")
+            private String countryAbbreviation;
+    
+            @JsonProperty("places")
+            private List<Places> places;
+    
             @Data
             @Accessors(fluent = true)
             @NoArgsConstructor
             @AllArgsConstructor
-            public class ZipResponse {
-                //
-            }
-            ```
-        4. add annotations for proper json parsing:
-            ```java
-            package org.study.model;
+            public static class Places {
     
-            import com.fasterxml.jackson.annotation.JsonProperty;
-            import lombok.AllArgsConstructor;
-            import lombok.Data;
-            import lombok.NoArgsConstructor;
-            import lombok.experimental.Accessors;
+                @JsonProperty("place name")
+                private String placeName;
     
-            import java.util.List;
+                @JsonProperty("longitude")
+                private String longitude;
     
-            @Data
-            @Accessors(fluent = true)
-            @NoArgsConstructor
-            @AllArgsConstructor
-            public class ZipResponse {
+                @JsonProperty("latitude")
+                private String latitude;
     
-                @JsonProperty("post code")
-                private String postCode;
+                @JsonProperty("state")
+                private String state;
     
-                @JsonProperty("country")
-                private String country;
-    
-                @JsonProperty("country abbreviation")
-                private String countryAbbreviation;
-    
-                @JsonProperty("places")
-                private List<Places> places;
-    
-                @Data
-                @Accessors(fluent = true)
-                @NoArgsConstructor
-                @AllArgsConstructor
-                public static class Places {
-    
-                    @JsonProperty("place name")
-                    private String placeName;
-    
-                    @JsonProperty("longitude")
-                    private String longitude;
-    
-                    @JsonProperty("latitude")
-                    private String latitude;
-    
-                    @JsonProperty("state")
-                    private String state;
-    
-                    @JsonProperty("state abbreviation")
-                    private String stateAbbreviation;
-    
-                }
+                @JsonProperty("state abbreviation")
+                private String stateAbbreviation;
     
             }
-            ```
-        5. now we are ready to create one more test in `RestAssuredZipTests`:
-            ```java
-            public class RestAssuredZipTests {
+    
+        }
+        ```
+    5. now we are ready to create one more test in `RestAssuredZipTests`:
+        ```java
+        public class RestAssuredZipTests {
 
-                private static final String ZIP_URL = "https://api.zippopotam.us/us/{zip}";
+            private static final String ZIP_URL = "https://api.zippopotam.us/us/{zip}";
 
-                @Test
-                void validZipPojoTest() {
-                    String zip = "33162";
-                    ZipResponse zipResponse = given().log().all()
-                        .when().get(ZIP_URL, zip)
-                        .then().log().all()
-                        .statusCode(200)
-                        .contentType(ContentType.JSON)
-                        .extract().as(ZipResponse.class);
+            @Test
+            void validZipPojoTest() {
+                String zip = "33162";
+                ZipResponse zipResponse = given().log().all()
+                    .when().get(ZIP_URL, zip)
+                    .then().log().all()
+                    .statusCode(200)
+                    .contentType(ContentType.JSON)
+                    .extract().as(ZipResponse.class);
 
-                    Assertions.assertEquals(zip, zipResponse.postCode(), "post code");
-                    Assertions.assertEquals(1, zipResponse.places().size(), "places list size");
-                    Assertions.assertEquals("Florida", zipResponse.places().get(0).state(), "state");
-                    Assertions.assertEquals("FL", zipResponse.places().get(0).stateAbbreviation(), "state abbreviation");
-                }
+                Assertions.assertEquals(zip, zipResponse.postCode(), "post code");
+                Assertions.assertEquals(1, zipResponse.places().size(), "places list size");
+                Assertions.assertEquals("Florida", zipResponse.places().get(0).state(), "state");
+                Assertions.assertEquals("FL", zipResponse.places().get(0).stateAbbreviation(), "state abbreviation");
             }
-            ```
-4. Create a test with request body and HTTP method POST:
+        }
+        ```
+5. Create a test with request body and HTTP method POST:
     1. review API documentation on `http://jsonplaceholder.typicode.com/guide/`,
     2. create another test class `RestAssuredTodosTests`,
     3. implement model classes:
         ```java
-            @Data
-            @Accessors(fluent = true)
-            @NoArgsConstructor
-            @AllArgsConstructor
-            public class TodoRequest {
+        @Data
+        @Accessors(fluent = true)
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public class TodoRequest {
     
-                @JsonProperty
-                private Integer userId;
+            @JsonProperty
+            private Integer userId;
                 
-                @JsonProperty
-                private Integer id;
+            @JsonProperty
+            private Integer id;
        
-                @JsonProperty
-                private String title;
+            @JsonProperty
+            private String title;
        
-                @JsonProperty
-                private boolean completed;
+            @JsonProperty
+            private boolean completed;
     
-            }
+        }
         ```
         ```java
-            @Data
-            @Accessors(fluent = true)
-            @NoArgsConstructor
-            @AllArgsConstructor
-            public class TodoResponse {
+        @Data
+        @Accessors(fluent = true)
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public class TodoResponse {
     
-                @JsonProperty
-                private Integer userId;
+            @JsonProperty
+            private Integer userId;
                 
-                @JsonProperty
-                private Integer id;
+            @JsonProperty
+            private Integer id;
        
-                @JsonProperty
-                private String title;
+            @JsonProperty
+            private String title;
        
-                @JsonProperty
-                private boolean completed;
+            @JsonProperty
+            private boolean completed;
     
-            }
+        }
         ```
-    4. the test with [soft assertions](https://junit.org/junit5/docs/current/user-guide/#writing-tests-assertions) will look like this:
+    4. the test with [multiple assertion](https://junit.org/junit5/docs/current/user-guide/#writing-tests-assertions) will look like this:
         ```java
         public class RestAssuredTodosTests {
 
@@ -411,9 +414,9 @@ Let's create an automation framework for Restful API testing. Tools:
 
         }
         ```
-5. Task: create a test for HTTP status code 404 using `https://api.zippopotam.us/us/` URL.
-6. Task: create tests for another model - zip by city using `http://api.zippopotam.us/us/ma/belmont`.
-7. Create a suite for REST-assured tests:
+6. Task: create a test for HTTP status code 404 using `https://api.zippopotam.us/us/` URL.
+7. Task: create tests for another model - zip by city using `http://api.zippopotam.us/us/ma/belmont`.
+8. Create and execute a suite for REST-assured tests:
     ```java
     package org.study.tests;
     
@@ -452,9 +455,9 @@ Let's create an automation framework for Restful API testing. Tools:
     }
     ``` 
 4. Rebuild the project and run some tests, for example `RestAssuredSuite`.
-5. In Terminal execute `allure serve $projectRoot/study-rest-assured-gradle\build\allure-results`.
+5. In Terminal execute `allure serve $replaceWithYourProjectRoot/study-rest-assured-gradle\build\allure-results`.
 6. As a result, a new browser window will be opened with a test execution report. It will contain tests and no step details.
-7. To create more informative report, do the following:
+7. To create a more informative report, do the following:
     1. create a separate package `allure` in `tests` and copy REST-assured tests there,
     2. rename the tests to comply with `RestAssuredWithAllure*Tests` pattern,
     3. create a test suite `RestAssuredWithAllureSuite` and change package pattern `@SelectPackages("org.study.tests.allure")`,
@@ -769,5 +772,70 @@ We will use Lobmok support for logging and create a custom logging template for 
    
 ### Configuration Properties
 
-TODO
+1. Let's move environment specific configuration to a properties file.
+2. Create file `local-test.properties` in `test/resources`:
+    ```properties
+    zip.url = https://api.zippopotam.us/us/{zip}
+    zip.city.url = https://api.zippopotam.us/us/{state}/{city}
+    todo.url = https://jsonplaceholder.typicode.com/users/{userId}/todos
+    ```
+3. Create class `config/EnvConfigProvider`:
+    ```java
+    package org.study.config;
+    
+    import java.io.IOException;
+    import java.util.Properties;
+    
+    public class EnvConfigProvider {
+    
+        public static String zipURL;
+        public static String zipByCityURL;
+        public static String todoURL;
+    
+        private EnvConfigProvider() {
+        }
+    
+        public static void init() {
+            Properties properties = new Properties();
+            try {
+                properties.load(EnvConfigProvider.class.getResourceAsStream("/local-test.properties"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            zipURL = properties.getProperty("zip.url");
+            zipByCityURL = properties.getProperty("zip.city.url");
+            todoURL = properties.getProperty("todo.url");
+        }
+   
+    }
+    ```
+4. In `RestAssuredWithAllureTestsBase#configure()` method add line:
+    ```java
+    public class RestAssuredWithAllureTestsBase {
 
+        @BeforeAll
+        protected static void configure() {
+            EnvConfigProvider.init();
+            // ...
+        }
+    }
+    ```
+    This method will init all static configurations and will make them available in all tests that inherit from `RestAssuredWithAllureTestsBase`.
+5. Replace URLs in all `RestAssuredWithAllure*` tests, for example:
+    ```java
+    public class RestAssuredWithAllureZipTests extends RestAssuredWithAllureTestsBase {
+
+        private static final String ZIP_URL = EnvConfigProvider.zipURL;
+        private static final String ZIP_BY_CITY_URL = EnvConfigProvider.zipByCityURL;
+   
+        // ..
+    }
+    ```
+6. Run the improved tests - they should pass.
+7. Do the same with `RestAssured*` tests.
+
+### Structure Tests into Packages
+
+1. Create package `junit5` in `tests` and remove corresponding classes `tests/JUnit5*` there.
+2. Create package `restassured` in `tests` and remove corresponding classes `tests/RestAssured*` there. 
+Do not forget to update package in `RestAssuredSuite`.

@@ -1,8 +1,9 @@
-package org.study.tests;
+package org.study.tests.restassured;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.study.config.EnvConfigProvider;
 import org.study.model.ZipByCityResponse;
 import org.study.model.ZipResponse;
 
@@ -10,10 +11,10 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.equalTo;
 
-public class RestAssuredZipTests {
+public class RestAssuredZipTests extends RestAssuredTestsBase {
 
-    private static final String ZIP_URL = "https://api.zippopotam.us/us/{zip}";
-    private static final String ZIP_BY_CITY_URL = "https://api.zippopotam.us/us/{state}/{city}";
+    private static final String ZIP_URL = EnvConfigProvider.zipURL;
+    private static final String ZIP_BY_CITY_URL = EnvConfigProvider.zipByCityURL;
 
     @Test
     void validZipTest() {
