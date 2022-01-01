@@ -579,7 +579,6 @@ To better control dependencies versions used in the project, extract them into a
     junit_platform_version = 1.8.2
     rest_assured_version = 4.4.0
     jackson_version = 2.13.1
-    jaxb_api_version = 2.3.1
     allure_version = 2.17.1
     ```
 2. `study-rest-assured-gradle/build.gradle`:
